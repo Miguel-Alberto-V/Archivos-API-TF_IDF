@@ -68,10 +68,31 @@ app.MapGet("/recommendations/{rowNum:int}", async (int rowNum) =>
         return Results.Problem($"Error retrieving recommendations for row number {rowNum} from the Flask API.");
     }
 
-    var recommendations = await response.Content.ReadFromJsonAsync<List<Recommendation>>();
+    var recommendations = await response.Content.ReadFromJsonAsync<List<string>>();
     return Results.Ok(recommendations);
 })
 .WithName("GetRecommendations")
+.WithOpenApi();
+
+// Endpoint para obtener los posts con mayores votos desde la API Flask
+app.MapGet("/top-posts", async () =>
+{
+    using var client = new HttpClient();
+    var response = await client.GetFromJsonAsync<List<Post>>($"{flaskApiUrl}/posts");
+
+    if (response == null)
+    {
+        return Results.Problem("Error retrieving posts from the Flask API.");
+    }
+
+    // Filtrar los posts con el mayor número de votos
+    var topPosts = response.Where(post => post.Votes > 0)
+                           .OrderByDescending(post => post.Votes)
+                           .ToList();
+
+    return Results.Ok(topPosts);
+})
+.WithName("GetTopPosts")
 .WithOpenApi();
 
 app.Run();
@@ -83,6 +104,8 @@ record Post
     public string Title { get; init; }
     public string Content { get; init; }
     public string Tags { get; init; }
+    public string Link { get; init; }
+    public int Votes { get; init; }
 }
 
 // Definición de la clase Recommendation
