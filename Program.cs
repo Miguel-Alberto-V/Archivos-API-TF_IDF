@@ -39,7 +39,9 @@ if (app.Environment.IsDevelopment())
 }
 
 // Base URL de tu API Flask
-var flaskApiUrl = "http://ip172-18-0-57-craik7iim2rg00f6c1u0-5000.direct.labs.play-with-docker.com"; // Cambia <flask-api-host> por la dirección IP o dominio de tu API Flask
+
+// Obtener la URL de la API Flask desde la variable de entorno
+var flaskApiUrl = Environment.GetEnvironmentVariable("FLASK_API_URL") ?? "http://default-url-if-env-var-is-not-set"; // Cambia <flask-api-host> por la dirección IP o dominio de tu API Flask
 
 // Endpoint para obtener la lista de posts desde la API Flask
 app.MapGet("/posts", async () =>
